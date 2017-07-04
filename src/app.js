@@ -3,6 +3,8 @@ import { run } from '@cycle/run'
 import { makeDOMDriver } from '@cycle/dom'
 import { html } from 'snabbdom-jsx'
 import Papa from 'papaparse'
+import hash from 'object-hash'
+import { get } from 'lodash/fp'
 
 function main(sources) {
   const files$ = sources.DOM
@@ -28,9 +30,10 @@ function main(sources) {
             {
               Papa.parse(fileContent, { header: true })
                 .data
+                .filter(get('Betrag'))
                 .map(
                   transaction =>
-                    <li>{transaction.Betrag}</li>
+                    <li>{hash.sha1(transaction)} {transaction.Verwendungszweck} {transaction.Betrag} {JSON.stringify(transaction)}</li>
                 )
             }
           </ul>)
