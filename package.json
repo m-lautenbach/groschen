@@ -9,6 +9,7 @@
     "@cycle/dom": "^17.5.0",
     "@cycle/run": "^3.1.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
+    "papaparse": "^4.3.3",
     "snabbdom-jsx": "^0.3.1",
     "xstream": "^10.8.0"
   },

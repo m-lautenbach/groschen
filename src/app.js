@@ -1,7 +1,8 @@
-import xs from 'xstream';
-import { run } from '@cycle/run';
-import { makeDOMDriver } from '@cycle/dom';
+import xs from 'xstream'
+import { run } from '@cycle/run'
+import { makeDOMDriver } from '@cycle/dom'
 import { html } from 'snabbdom-jsx'
+import Papa from 'papaparse'
 
 function main(sources) {
   const files$ = sources.DOM
@@ -22,7 +23,17 @@ function main(sources) {
         reader.readAsText(file, 'iso-8859-1')
       }
       return stream
-        .map(fileContent => <div>{fileContent}</div>)
+        .map(fileContent =>
+          <ul>
+            {
+              Papa.parse(fileContent, { header: true })
+                .data
+                .map(
+                  transaction =>
+                    <li>{transaction.Betrag}</li>
+                )
+            }
+          </ul>)
         .startWith(null)
         .map(fileElement => <div>
           <input type="file" className="csv-input" />
