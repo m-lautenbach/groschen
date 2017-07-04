@@ -19,7 +19,7 @@ function main(sources) {
 
         reader.onload = evt => stream.shamefullySendNext(evt.target.result)
 
-        reader.readAsText(file)
+        reader.readAsText(file, 'iso-8859-1')
       }
       return stream
         .map(fileContent => <div>{fileContent}</div>)
