@@ -28,6 +28,7 @@ function main(sources) {
         .map(fileContent =>
           <ul>
             {
+              // TODO: Map transaction keys to something reasonable and save in local storage
               Papa.parse(fileContent, { header: true })
                 .data
                 .filter(get('Betrag'))
