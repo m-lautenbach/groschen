@@ -6,6 +6,26 @@ import Papa from 'papaparse'
 import hash from 'object-hash'
 import { get } from 'lodash/fp'
 
+const idLabelPairs = [
+  ['', 'Auftragskonto'],
+  ['', 'Buchungstag'],
+  ['', 'Valutadatum'],
+  ['', 'Buchungstext'],
+  ['', 'Verwendungszweck'],
+  ['', 'Glaeubiger ID'],
+  ['', 'Mandatsreferenz'],
+  ['', 'Kundenreferenz (End-to-End)'],
+  ['', 'Sammlerreferenz'],
+  ['', 'Lastschrift Ursprungsbetrag'],
+  ['', 'Auslagenersatz Ruecklastschrift'],
+  ['', 'Beguenstigter/Zahlungspflichtiger'],
+  ['', 'Kontonummer/IBAN'],
+  ['', 'BIC (SWIFT-Code)'],
+  ['', 'Betrag'],
+  ['', 'Waehrung'],
+  ['', 'Info'],
+]
+
 function main(sources) {
   const files$ = sources.DOM
     .select('.csv-input')
