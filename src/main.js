@@ -59,6 +59,8 @@ function main(sources) {
       ))
     ))
 
+  // TODO: save transactions to local storage
+
   const vdom$ = transactions$
     .startWith([])
     .map(
