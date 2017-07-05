@@ -4,8 +4,9 @@ import { makeDOMDriver } from '@cycle/dom'
 import { html } from 'snabbdom-jsx'
 import Papa from 'papaparse'
 import hash from 'object-hash'
-import { get, mapKeys, mapValues } from 'lodash/fp'
-import { invert, fromPairs } from 'lodash'
+import { get, mapKeys, mapValues, keyBy, map, set, tap } from 'lodash/fp'
+import { invert, fromPairs, first, bind, flow } from 'lodash'
+import _ from 'lodash'
 
 const idLabelPairs = [
   ['auftragskonto', 'Auftragskonto'],
@@ -27,53 +28,52 @@ const idLabelPairs = [
   ['info', 'Info'],
 ]
 
-const keyToLabel = fromPairs(idLabelPairs)
-const labelToKey = invert(keyToLabel)
+const functionFromMap = map => key => map[key]
+
+const keyToLabel = functionFromMap(fromPairs(idLabelPairs))
+const labelToKey = functionFromMap(invert(fromPairs(idLabelPairs)))
+
 
 function main(sources) {
-  const files$ = sources.DOM
+  const file$ = sources.DOM
     .select('.csv-input')
     .events('change')
     .map(evt => evt.target.files)
-    .startWith([])
+    .map(first)
 
-  const vdom$ = files$
-    .map(files => {
-      const file = files[0]
-      const stream = xs.create()
-      if (file) {
-        var reader = new FileReader();
-
-        reader.onload = evt => stream.shamefullySendNext(evt.target.result)
-
-        reader.readAsText(file, 'iso-8859-1')
-      }
-      return stream
-        .map(fileContent =>
-          <ul>
-            {
-              // TODO: Map transaction keys to something reasonable and save in local storage
-              Papa.parse(fileContent, { header: true })
-                .data
-                .filter(get('betrag'))
-        		.map(mapKeys(label => labelToKey[label]))
-                .map(
-                  transaction =>
-                    <li>{hash.sha1(transaction)} {JSON.stringify(transaction)}</li>
-                )
-            }
-          </ul>)
-        .startWith(null)
-        .map(fileElement => <div>
-          <input type="file" className="csv-input" />
-          {fileElement || ''}
-        </div>)
+  const transactions$ = file$
+    .map(file => {
+      const file$ = xs.create()
+      var reader = new FileReader()
+      reader.onload = evt => file$.shamefullySendNext(evt.target.result)
+      reader.readAsText(file, 'iso-8859-1')
+      return file$
     })
     .flatten()
+    .map(flow(
+      bind(Papa.parse, Papa, _, { header: true }),
+      get('data'),
+      map(flow(
+        mapKeys(labelToKey),
+        transaction => set('id', hash.sha1(transaction), transaction)
+      ))
+    ))
+
+  const vdom$ = transactions$
+    .startWith([])
+    .map(
+      transactions =>
+        <div>
+          <input type="file" className="csv-input" />
+          <ul>
+            {transactions.map(transaction => <li>{JSON.stringify(transaction)}</li>)}
+          </ul>
+        </div>
+    )
 
   return {
     DOM: vdom$
-  };
+  }
 }
 
 export default main

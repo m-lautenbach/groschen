@@ -1,6 +1,6 @@
 import {run} from '@cycle/run'
 import {makeDOMDriver} from '@cycle/dom'
-import main from './app'
+import main from './main'
 
 const drivers = {
   DOM: makeDOMDriver('#app')
