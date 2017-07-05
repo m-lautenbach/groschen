@@ -4,27 +4,31 @@ import { makeDOMDriver } from '@cycle/dom'
 import { html } from 'snabbdom-jsx'
 import Papa from 'papaparse'
 import hash from 'object-hash'
-import { get } from 'lodash/fp'
+import { get, mapKeys, mapValues } from 'lodash/fp'
+import { invert, fromPairs } from 'lodash'
 
 const idLabelPairs = [
-  ['', 'Auftragskonto'],
-  ['', 'Buchungstag'],
-  ['', 'Valutadatum'],
-  ['', 'Buchungstext'],
-  ['', 'Verwendungszweck'],
-  ['', 'Glaeubiger ID'],
-  ['', 'Mandatsreferenz'],
-  ['', 'Kundenreferenz (End-to-End)'],
-  ['', 'Sammlerreferenz'],
-  ['', 'Lastschrift Ursprungsbetrag'],
-  ['', 'Auslagenersatz Ruecklastschrift'],
-  ['', 'Beguenstigter/Zahlungspflichtiger'],
-  ['', 'Kontonummer/IBAN'],
-  ['', 'BIC (SWIFT-Code)'],
-  ['', 'Betrag'],
-  ['', 'Waehrung'],
-  ['', 'Info'],
+  ['auftragskonto', 'Auftragskonto'],
+  ['buchungstag', 'Buchungstag'],
+  ['valutadatum', 'Valutadatum'],
+  ['buchungstext', 'Buchungstext'],
+  ['verwendungszweck', 'Verwendungszweck'],
+  ['glaeubiger', 'Glaeubiger ID'],
+  ['mandatsreferenz', 'Mandatsreferenz'],
+  ['kundenreferenz', 'Kundenreferenz (End-to-End)'],
+  ['sammlerreferenz', 'Sammlerreferenz'],
+  ['lastschriftUrsprungsbetrag', 'Lastschrift Ursprungsbetrag'],
+  ['auslagenersatzRuecklastschrift', 'Auslagenersatz Ruecklastschrift'],
+  ['beguenstigter', 'Beguenstigter/Zahlungspflichtiger'],
+  ['iban', 'Kontonummer/IBAN'],
+  ['bic', 'BIC (SWIFT-Code)'],
+  ['betrag', 'Betrag'],
+  ['waehrung', 'Waehrung'],
+  ['info', 'Info'],
 ]
+
+const keyToLabel = fromPairs(idLabelPairs)
+const labelToKey = invert(keyToLabel)
 
 function main(sources) {
   const files$ = sources.DOM
@@ -51,10 +55,11 @@ function main(sources) {
               // TODO: Map transaction keys to something reasonable and save in local storage
               Papa.parse(fileContent, { header: true })
                 .data
-                .filter(get('Betrag'))
+                .filter(get('betrag'))
+		.map(mapKeys(label => labelToKey[label]))
                 .map(
                   transaction =>
-                    <li>{hash.sha1(transaction)} {transaction.Verwendungszweck} {transaction.Betrag} {JSON.stringify(transaction)}</li>
+                    <li>{hash.sha1(transaction)} {JSON.stringify(transaction)}</li>
                 )
             }
           </ul>)
