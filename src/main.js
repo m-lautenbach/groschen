@@ -56,7 +56,7 @@ function main(sources) {
               Papa.parse(fileContent, { header: true })
                 .data
                 .filter(get('betrag'))
-		.map(mapKeys(label => labelToKey[label]))
+        		.map(mapKeys(label => labelToKey[label]))
                 .map(
                   transaction =>
                     <li>{hash.sha1(transaction)} {JSON.stringify(transaction)}</li>
@@ -76,6 +76,4 @@ function main(sources) {
   };
 }
 
-run(main, {
-  DOM: makeDOMDriver('#app')
-});
+export default main
